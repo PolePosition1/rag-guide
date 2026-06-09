@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<script>document.documentElement.classList.add('js');</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The New Rules of AI Search — A RAG Field Guide | Whiskey River Media</title>
+<meta name="description" content="Search became a machine that reads the web, writes the answer, and cites its sources. Here's how RAG works — and the three things Google says get your brand cited instead of skipped.">
+
+<!-- Open Graph -->
+<meta property="og:title" content="The New Rules of AI Search — A RAG Field Guide">
+<meta property="og:description" content="How AI search actually works, and the 3 things that get your brand cited. Straight from Google's official guide.">
+<meta property="og:type" content="article">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;0,800;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --black:#0A0A0B;
+    --carbon:#101012;
+    --panel:#16161A;
+    --line:#262629;
+    --gold:#C4941F;
+    --gold-soft:#E0B85A;
+    --teal:#00D2BE;
+    --bone:#ECEAE3;
+    --muted:#8C8C92;
+    --muted-dim:#5A5A60;
+    --maxw:1080px;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0;}
+
+  html{scroll-behavior:smooth;}
+
+  body{
+    background:var(--black);
+    color:var(--bone);
+    font-family:'Inter',system-ui,sans-serif;
+    font-size:17px;
+    line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+
+  /* carbon-fibre weave, kept very subtle */
+  body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    z-index:0;
+    pointer-events:none;
+    background-image:
+      repeating-linear-gradient(45deg, rgba(255,255,255,.014) 0 1px, transparent 1px 4px),
+      repeating-linear-gradient(-45deg, rgba(255,255,255,.014) 0 1px, transparent 1px 4px),
+      radial-gradient(1200px 700px at 70% -10%, rgba(196,148,31,.10), transparent 60%),
+      radial-gradient(900px 600px at -10% 30%, rgba(0,210,190,.06), transparent 55%);
+    background-size:6px 6px,6px 6px,100% 100%,100% 100%;
+  }
+
+  .wrap{position:relative;z-index:1;max-width:var(--maxw);margin:0 auto;padding:0 28px;}
+
+  /* ---------- typography helpers ---------- */
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;
+    font-weight:500;
+    letter-spacing:.32em;
+    text-transform:uppercase;
+    color:var(--teal);
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+  }
+  .eyebrow::before{
+    content:"";width:26px;height:1px;background:var(--teal);opacity:.7;
+  }
+
+  h1,h2,h3{font-family:'Playfair Display',Georgia,serif;font-weight:700;line-height:1.06;letter-spacing:-.01em;}
+
+  .section-title{font-size:clamp(28px,4.4vw,46px);margin:18px 0 22px;}
+  .section-title em{font-style:italic;color:var(--gold);}
+
+  p.lead{color:var(--muted);font-size:clamp(16px,2vw,19px);max-width:62ch;}
+
+  /* ---------- top bar ---------- */
+  header.bar{
+    position:relative;z-index:3;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:22px 28px;max-width:var(--maxw);margin:0 auto;
+  }
+  .brand{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--bone);
+    display:flex;align-items:center;gap:11px;
+  }
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--gold);box-shadow:0 0 12px var(--gold);}
+  .bar .tag{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.18em;color:var(--muted-dim);text-transform:uppercase;}
+
+  /* ---------- hero ---------- */
+  .hero{padding:54px 0 30px;}
+  .hero h1{font-size:clamp(44px,8.5vw,92px);font-weight:800;margin:26px 0 0;}
+  .hero h1 .teal{color:var(--teal);}
+  .hero .thesis{margin-top:26px;font-size:clamp(17px,2.3vw,21px);color:var(--bone);max-width:60ch;line-height:1.6;}
+  .hero .thesis b{color:var(--gold-soft);font-weight:600;}
+  .hero .meta{
+    margin-top:30px;font-family:'JetBrains Mono',monospace;font-size:12px;
+    letter-spacing:.06em;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap;align-items:center;
+  }
+  .hero .meta a{color:var(--teal);text-decoration:none;border-bottom:1px solid rgba(0,210,190,.35);}
+  .hero .meta a:hover{border-color:var(--teal);}
+
+  /* ---------- the signature: RAG telemetry pipeline ---------- */
+  .telemetry{
+    margin:52px 0 10px;
+    border:1px solid var(--line);
+    border-radius:14px;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.02), transparent 40%),
+      var(--carbon);
+    padding:30px 26px 26px;
+    position:relative;
+    overflow:hidden;
+  }
+  .telemetry .tlabel{
+    font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.26em;
+    text-transform:uppercase;color:var(--muted-dim);display:flex;justify-content:space-between;
+  }
+  .telemetry .tlabel .live{color:var(--teal);display:flex;align-items:center;gap:7px;}
+  .telemetry .tlabel .live .pulse{width:7px;height:7px;border-radius:50%;background:var(--teal);box-shadow:0 0 10px var(--teal);animation:blink 1.6s infinite;}
+  @keyframes blink{0%,100%{opacity:1;}50%{opacity:.25;}}
+
+  .pipe{
+    margin-top:24px;display:grid;
+    grid-template-columns:repeat(4,1fr);gap:14px;align-items:stretch;
+  }
+  .node{
+    position:relative;border:1px solid var(--line);border-radius:11px;
+    background:rgba(255,255,255,.015);padding:18px 16px 16px;min-height:128px;
+    display:flex;flex-direction:column;justify-content:flex-start;
+  }
+  .node .num{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--gold);letter-spacing:.12em;}
+  .node .nlabel{font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--bone);margin-top:8px;font-weight:700;}
+  .node .ndesc{font-size:13px;color:var(--muted);line-height:1.45;margin-top:14px;}
+
+  /* the cited node = your content, lit teal */
+  .node.cited{border-color:rgba(0,210,190,.55);background:linear-gradient(180deg, rgba(0,210,190,.10), rgba(0,210,190,.02));box-shadow:0 0 0 1px rgba(0,210,190,.18),0 0 34px -6px rgba(0,210,190,.30);}
+  .node.cited .nlabel{color:var(--teal);}
+  .node.cited .num{color:var(--teal);}
+  .node .chip{
+    margin-top:12px;align-self:flex-start;font-family:'JetBrains Mono',monospace;font-size:10px;
+    letter-spacing:.16em;text-transform:uppercase;color:var(--teal);
+    border:1px solid rgba(0,210,190,.5);border-radius:999px;padding:4px 10px;
+    display:inline-flex;align-items:center;gap:6px;
+  }
+  .node .chip::before{content:"↳";font-size:11px;}
+
+  /* the trace line + travelling pulse */
+  .trace{position:relative;height:2px;margin:20px 6px 6px;background:var(--line);border-radius:2px;overflow:hidden;}
+  .trace .runner{position:absolute;top:0;left:-22%;width:22%;height:100%;
+    background:linear-gradient(90deg,transparent,var(--gold),var(--teal),transparent);
+    animation:run 3.4s cubic-bezier(.5,0,.5,1) infinite;}
+  @keyframes run{0%{left:-22%;}100%{left:100%;}}
+
+  .telemetry .caption{
+    margin-top:18px;font-size:14px;color:var(--muted);max-width:74ch;line-height:1.55;
+  }
+  .telemetry .caption b{color:var(--gold-soft);font-weight:600;}
+
+  /* ---------- generic section ---------- */
+  section{padding:64px 0;border-top:1px solid var(--line);}
+  section.nrule{border-top:none;}
+
+  /* shift: old vs now */
+  .shift{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:30px;}
+  .shift .card{border:1px solid var(--line);border-radius:13px;padding:26px 24px;background:var(--carbon);}
+  .shift .card .tag{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;}
+  .shift .old .tag{color:var(--muted-dim);}
+  .shift .now .tag{color:var(--teal);}
+  .shift .card h3{font-size:23px;margin:14px 0 10px;color:var(--bone);}
+  .shift .now{border-color:rgba(0,210,190,.35);}
+  .shift .card p{color:var(--muted);font-size:15.5px;}
+  .shift-kicker{margin-top:26px;font-family:'Playfair Display',serif;font-style:italic;font-size:clamp(20px,3vw,28px);color:var(--gold);}
+
+  /* the 3 rules */
+  .rules{display:flex;flex-direction:column;gap:2px;margin-top:34px;}
+  .rule{
+    display:grid;grid-template-columns:96px 1fr;gap:30px;
+    padding:34px 0;border-top:1px solid var(--line);
+  }
+  .rule:first-child{border-top:1px solid var(--gold);}
+  .rule .rnum{font-family:'Playfair Display',serif;font-size:62px;font-weight:800;line-height:.8;color:var(--gold);opacity:.9;}
+  .rule h3{font-size:clamp(24px,3.2vw,32px);color:var(--bone);margin-bottom:16px;}
+  .rule .gsays,.rule .youdo{font-size:15.5px;line-height:1.62;}
+  .rule .gsays{color:var(--muted);margin-bottom:14px;padding-left:16px;border-left:2px solid var(--line);}
+  .rule .gsays span,.rule .youdo span{
+    font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;
+    display:block;margin-bottom:6px;
+  }
+  .rule .gsays span{color:var(--muted-dim);}
+  .rule .youdo span{color:var(--teal);}
+  .rule .youdo{color:var(--bone);}
+  .rule .youdo b{color:var(--gold-soft);font-weight:600;}
+
+  /* receipts / sources */
+  .receipts{display:flex;flex-direction:column;gap:14px;margin-top:30px;}
+  .receipt{
+    border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:8px;
+    background:var(--carbon);padding:18px 20px;
+  }
+  .receipt p{font-size:15px;color:var(--bone);line-height:1.55;}
+  .receipt .src{
+    margin-top:9px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.04em;color:var(--muted);
+  }
+  .receipt .src a{color:var(--teal);text-decoration:none;border-bottom:1px solid rgba(0,210,190,.3);word-break:break-all;}
+  .receipt .src a:hover{border-color:var(--teal);}
+
+  /* ---------- CTA ---------- */
+  .cta{text-align:center;border-top:1px solid var(--line);}
+  .cta .punch{font-size:clamp(38px,7vw,72px);font-weight:800;line-height:1;margin-bottom:8px;}
+  .cta .punch .gold{color:var(--gold);}
+  .cta p.lead{margin:22px auto 34px;text-align:center;color:var(--bone);}
+  .btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+  .btn{
+    font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.12em;text-transform:uppercase;
+    text-decoration:none;padding:16px 26px;border-radius:9px;font-weight:500;transition:transform .15s ease,box-shadow .2s ease;
+    display:inline-flex;align-items:center;gap:9px;
+  }
+  .btn.primary{background:var(--gold);color:#1a1205;font-weight:700;box-shadow:0 8px 30px -10px rgba(196,148,31,.6);}
+  .btn.primary:hover{transform:translateY(-2px);box-shadow:0 14px 38px -10px rgba(196,148,31,.7);}
+  .btn.ghost{border:1px solid var(--line);color:var(--bone);}
+  .btn.ghost:hover{border-color:var(--teal);color:var(--teal);transform:translateY(-2px);}
+
+  /* ---------- footer ---------- */
+  footer{border-top:1px solid var(--line);padding:34px 0 60px;}
+  .foot{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;}
+  .foot .sig{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted-dim);}
+  .foot .sig b{color:var(--gold);}
+  .foot .ethos{font-family:'Playfair Display',serif;font-style:italic;color:var(--muted);font-size:16px;}
+
+  /* ---------- reveal animation (progressive enhancement) ---------- */
+  .js .reveal{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease;}
+  .js .reveal.in{opacity:1;transform:none;}
+
+  /* ---------- responsive ---------- */
+  @media(max-width:860px){
+    .pipe{grid-template-columns:1fr 1fr;}
+    .shift{grid-template-columns:1fr;}
+  }
+  @media(max-width:560px){
+    body{font-size:16px;}
+    .wrap{padding:0 20px;}
+    header.bar{padding:18px 20px;}
+    .bar .tag{display:none;}
+    .hero{padding:34px 0 18px;}
+    .pipe{grid-template-columns:1fr;}
+    .rule{grid-template-columns:1fr;gap:12px;}
+    .rule .rnum{font-size:44px;}
+    section{padding:48px 0;}
+  }
+
+  @media(prefers-reduced-motion:reduce){
+    *{animation:none!important;scroll-behavior:auto!important;}
+    .reveal{opacity:1;transform:none;transition:none;}
+  }
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="brand"><span class="dot"></span>Whiskey River Media</div>
+  <div class="tag">Field Guide · AI Search</div>
+</header>
+
+<div class="wrap">
+
+  <!-- HERO -->
+  <div class="hero">
+    <span class="eyebrow">The Field Guide</span>
+    <h1>The New Rules<br>of <span class="teal">AI Search</span></h1>
+    <p class="thesis">Search stopped being ten blue links. It became a machine that reads the web, writes the answer, and cites its sources. <b>The brands that get cited win. The rest get skipped.</b> Here's how that machine works — and the three moves Google itself says to make.</p>
+    <div class="meta">
+      <span>Sourced from Google's official generative-AI guide</span>
+      <span>·</span>
+      <a href="https://developers.google.com/search/docs/fundamentals/ai-optimization-guide" target="_blank" rel="noopener">read it →</a>
+    </div>
+
+    <!-- SIGNATURE: RAG telemetry pipeline -->
+    <div class="telemetry reveal">
+      <div class="tlabel">
+        <span>RAG · RETRIEVAL-AUGMENTED GENERATION</span>
+        <span class="live"><span class="pulse"></span>LIVE PIPELINE</span>
+      </div>
+      <div class="pipe">
+        <div class="node">
+          <div><div class="num">01</div><div class="nlabel">Query</div></div>
+          <div class="ndesc">Someone asks Google a real question.</div>
+        </div>
+        <div class="node">
+          <div><div class="num">02</div><div class="nlabel">Fan-out</div></div>
+          <div class="ndesc">The model splits it into related sub-questions, all at once.</div>
+        </div>
+        <div class="node cited">
+          <div><div class="num">03</div><div class="nlabel">Retrieve</div></div>
+          <div class="ndesc">It pulls live pages from the index. Yours is good enough to trust.</div>
+          <span class="chip">Your content, cited</span>
+        </div>
+        <div class="node">
+          <div><div class="num">04</div><div class="nlabel">Ground + Cite</div></div>
+          <div class="ndesc">It writes the answer from those pages — with a clickable link back.</div>
+        </div>
+      </div>
+      <div class="trace"><span class="runner"></span></div>
+      <p class="caption">The pages the model trusts enough to cite get the clickable link inside the answer. <b>That citation is the new number-one ranking.</b> Everything below is about earning it.</p>
+    </div>
+  </div>
+
+  <!-- WHAT IS RAG -->
+  <section>
+    <span class="eyebrow">The Mechanic</span>
+    <h2 class="section-title">So what <em>is</em> RAG?</h2>
+    <p class="lead">A raw AI model only knows what it was trained on — frozen at a cutoff date, no live web. RAG bolts a search step onto the front of it. Before answering, the system <b style="color:var(--gold-soft)">retrieves</b> relevant, current pages from Google's index, then <b style="color:var(--gold-soft)">generates</b> a response grounded in what those pages actually say. Retrieve, then generate. That's the whole name — and it's why AI search can hand you a fresh, sourced answer instead of a confident guess.</p>
+  </section>
+
+  <!-- THE SHIFT -->
+  <section>
+    <span class="eyebrow">The Shift</span>
+    <h2 class="section-title">From "rank and hope" to <em>"get cited"</em></h2>
+    <div class="shift">
+      <div class="card old reveal">
+        <div class="tag">The Old Game</div>
+        <h3>You ranked a page.</h3>
+        <p>You stuffed in keywords, climbed to position three, and waited for someone to click. The page was the destination.</p>
+      </div>
+      <div class="card now reveal">
+        <div class="tag">The Game Now</div>
+        <h3>The AI reads your page.</h3>
+        <p>It builds the answer from your content — and only cites the sources worth trusting. Your page is now a source the machine quotes, not just a link it lists.</p>
+      </div>
+    </div>
+    <p class="shift-kicker">You don't optimize for a keyword anymore. You earn a citation.</p>
+  </section>
+
+  <!-- THE 3 RULES -->
+  <section class="nrule" style="border-top:1px solid var(--line);">
+    <span class="eyebrow">The Playbook</span>
+    <h2 class="section-title">Three rules Google <em>told us</em> to follow</h2>
+    <p class="lead">Not hacks. Not "AEO secrets." These come straight out of Google's own documentation — and Google spends a whole section debunking the gimmicks people are selling instead.</p>
+
+    <div class="rules">
+      <div class="rule reveal">
+        <div class="rnum">01</div>
+        <div>
+          <h3>Write non-commodity content</h3>
+          <p class="gsays"><span>What Google says</span>Commodity content — think "7 Tips for First-Time Homebuyers" — adds little, because anyone (or any AI) could write it. First-hand experience and a genuine point of view are what stand out across the sources it reviews.</p>
+          <p class="youdo"><span>What you do</span>Tell the story only you can tell. The deal that almost died. The client you saved. The opinion you'd defend in a room full of skeptics. <b>That's the content a model can't generate on its own — so that's the content it cites.</b></p>
+        </div>
+      </div>
+
+      <div class="rule reveal">
+        <div class="rnum">02</div>
+        <div>
+          <h3>Own your Google Business Profile</h3>
+          <p class="gsays"><span>What Google says</span>Google names the Business Profile directly as a way for local businesses to surface inside AI responses and across Search results.</p>
+          <p class="youdo"><span>What you do</span>Treat your profile like a second homepage. Keep it complete, current, and full of real reviews, and optimize it constantly. <b>For any local brand, it's one of the cleanest sources the AI can pull from</b> — and it links straight back to you.</p>
+        </div>
+      </div>
+
+      <div class="rule reveal">
+        <div class="rnum">03</div>
+        <div>
+          <h3>Stop over-producing</h3>
+          <p class="gsays"><span>What Google says</span>You don't need to "chunk" content into tiny pieces, write llms.txt files, or spin up a page for every keyword variation. Mass-producing pages to game rankings can get flagged under the scaled-content-abuse spam policy.</p>
+          <p class="youdo"><span>What you do</span>More doesn't win anymore. Take the content you already have and rewrite it to sound like you — sharper, deeper, human. <b>Volume is a tax now. Voice is the moat.</b></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RECEIPTS -->
+  <section>
+    <span class="eyebrow">Receipts</span>
+    <h2 class="section-title">Don't take my word for it</h2>
+    <p class="lead">Every claim above traces to one source — Google's own guide, last updated June 2026. When something's straight from the source, you only need one.</p>
+    <div class="receipts">
+      <div class="receipt reveal">
+        <p>Non-commodity, first-hand content beats recycled summaries; commodity content adds little unique value for readers.</p>
+        <div class="src">Google Search Central — Optimizing for Generative AI · <a href="https://developers.google.com/search/docs/fundamentals/ai-optimization-guide" target="_blank" rel="noopener">developers.google.com</a></div>
+      </div>
+      <div class="receipt reveal">
+        <p>Google Business Profiles help products and local-business details appear in AI responses and Google Search.</p>
+        <div class="src">Google Search Central — same guide</div>
+      </div>
+      <div class="receipt reveal">
+        <p>Chunking, llms.txt files, and extra structured data aren't required for AI search; mass-produced pages can violate the scaled-content-abuse policy.</p>
+        <div class="src">Google Search Central — same guide</div>
+      </div>
+      <div class="receipt reveal">
+        <p>RAG (grounding) shows prominent, clickable links to the web pages that support the AI's response.</p>
+        <div class="src">Google Search Central — same guide</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta">
+    <span class="eyebrow" style="justify-content:center;">Bottom Line</span>
+    <div class="punch" style="margin-top:18px;">Hope is not a <span class="gold">strategy.</span></div>
+    <p class="lead">You can't fake your way into AI search anymore. It rewards the brands that show up like nobody else can — and that takes a system, not a scramble. Building and running that system is what we do at Whiskey River Media.</p>
+    <div class="btns">
+      <a class="btn primary" href="https://whiskeyrivermedia.com" target="_blank" rel="noopener">Apply to Work With Us</a>
+      <a class="btn ghost" href="https://www.instagram.com/zach_schaefer/" target="_blank" rel="noopener">DM "RAG" on Instagram</a>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  <div class="wrap foot">
+    <div class="sig">© <span id="yr"></span> <b>Whiskey River Media</b> · AI-Powered Marketing</div>
+    <div class="ethos">"Hope is not a strategy."</div>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('yr').textContent = new Date().getFullYear();
+
+  // scroll reveal
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+  },{threshold:.16});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+
+</body>
+</html>
